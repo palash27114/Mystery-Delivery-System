@@ -121,6 +121,15 @@ def generate_dashboard_file(output_path: Path = DEFAULT_DASHBOARD_HTML) -> Path:
     root_dashboard = PROJECT_ROOT / "dashboard.html"
     with open(root_dashboard, "w", encoding="utf-8") as f:
         f.write(html)
+    # Sync copies for local opening and instant Vercel deployment
+    for target in [
+        PROJECT_ROOT / "dashboard.html",
+        PROJECT_ROOT / "index.html",
+        PROJECT_ROOT / "public" / "index.html",
+    ]:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        with open(target, "w", encoding="utf-8") as f:
+            f.write(html)
 
     return output_path
 
