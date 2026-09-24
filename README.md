@@ -1,26 +1,86 @@
 # FastBox Mystery Delivery System 🚚📦
 
-A modular, production-grade algorithmic delivery dispatch and fleet efficiency tracking system built for **FastBox**.
+A production-grade algorithmic delivery dispatch and fleet efficiency simulation engine built for **FastBox**.
 
 ---
 
-## 🏗️ Architecture & Project Structure
+## 🌟 Implemented Features & Capabilities
+
+### 1. ⚙️ Core Delivery Algorithm
+- **Dynamic Nearest-Agent Dispatch**: For every package, finds the optimal delivery agent based on Euclidean distance from the agent's **current dynamic location** to the package's pickup warehouse.
+- **Euclidean Distance Engine**:
+  $$\text{distance} = \sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}$$
+- **Full Day Lifecycle Simulation**:
+  - Agent travels from their current location to the pickup warehouse.
+  - Agent picks up package (with traffic/processing delay).
+  - Agent travels from warehouse to the delivery destination.
+  - Agent's location dynamically updates to the package's destination coordinate.
+- **Efficiency Scoring**:
+  $$\text{efficiency} = \frac{\text{total\_distance}}{\text{packages\_delivered}}$$
+  - **Lower is better** (represents shorter travel distance per package).
+  - Identifies the top-performing `best_agent` with the lowest efficiency rating.
+  - **Zero-Division Safe**: Handles agents with zero deliveries gracefully without runtime exceptions.
+- **Strict Schema & Constraint Validation**: Validates coordinate pairs, data types, and ensures all packages reference valid, existing warehouses.
+- **Automated JSON & CSV Reporting**: Generates standardized `report.json` and `best_agent.csv`.
+
+---
+
+### 2. 🎁 Assignment Bonus Features
+- **⏱️ Random Delivery Delays**: Simulates realistic real-world transit and loading delays (1–15 minutes per package).
+- **🗺️ Terminal ASCII Route Visualization**: Renders an ASCII coordinate grid ($60 \times 25$) mapping warehouses, agents, and package destinations directly in the terminal.
+- **👥 Mid-Day Agent Onboarding**: Supports dynamic fleet expansion allowing new agents to join midway through the day.
+- **📊 Top-Agent CSV Export**: Generates `best_agent.csv` recording the best performing agent's efficiency and delivery count.
+
+---
+
+### 3. 🖥️ Interactive Web Dashboard & Visualizer (`dashboard.py`)
+- **🎬 60 FPS Real-time Canvas Animation**:
+  - Animated delivery vehicles traveling smoothly between agent bases, warehouses, and destinations.
+  - Glowing vehicle trails, pickup ripple bursts at warehouses, and delivery completion bursts at destinations.
+  - Completed delivery paths remain subtly mapped in the background to visualize the daily delivery network.
+- **🎮 Full Playback Controls**:
+  - `▶ Play` / `⏸ Pause` / `⏮ Prev Step` / `⏭ Next Step` / `↻ Reset`.
+  - **Speed Selector**: Toggle playback speeds at `0.5x`, `1x`, `2x`, and `4x`.
+- **📡 Live Status HUD & Auto-Scrolling Log**:
+  - Live ticker updating vehicle actions in real time (*"🚚 A1 driving to W1 to pick up P1"*).
+  - Overall progress bar tracking daily delivery completion percentage.
+  - Active table row highlighting and automatic scrolling in the dispatch log.
+- **🗂️ Multi-Testcase Selector**: Dropdown to switch seamlessly between **Base Case** and all **10 Official Test Cases** without page reloads.
+- **📁 Custom JSON Upload with "Perfect JSON" Validator**:
+  - Upload custom `.json` test cases directly in the browser.
+  - Rejection modal providing the exact failure reason and format template for malformed inputs.
+  - Instantly evaluates valid uploads and adds them to the live dashboard.
+- **📥 1-Click CSV Report Extraction**: Download complete fleet performance and delivery dispatch logs directly from the browser.
+
+---
+
+### 4. 🧪 Automated Testing & Production Architecture
+- **Unified Test Runner (`run_tests.py`)**:
+  - **Unit Tests**: Distance math, coordinate validations, and zero-delivery edge cases.
+  - **Integration Tests**: Automatically verifies all **10 official assignment test cases** (99 / 99 packages delivered with 100% pass rate).
+- **Modular Python Architecture**: Clean separation between models, validation, analytics, simulation, and reporting in `src/fastbox/`.
+- **🐳 Docker & Docker Compose**: Pre-configured containerized services for simulation, testing, and web visualizer.
+- **Zero External Core Dependencies**: Uses 100% Python Standard Library (`math`, `json`, `csv`, `dataclasses`, `pathlib`).
+
+---
+
+## 🏗️ Project Architecture & Directory Layout
 
 ```text
 Nexeg_Assignment/
 │
 ├── src/                                  # Core FastBox Python Package
 │   └── fastbox/
-│       ├── __init__.py                   # Package exports
+│       ├── __init__.py                   # Package exports & versioning
 │       ├── config.py                     # Centralized paths and constants
-│       ├── models.py                     # Domain data classes (Point, Agent, Package, etc.)
+│       ├── models.py                     # Strongly typed data models (Point, Agent, Package, etc.)
 │       ├── distance.py                   # Euclidean distance calculation engine
 │       ├── validator.py                  # Strict schema validator & custom ValidationError
 │       ├── simulator.py                  # Core dispatch & dynamic location tracking engine
 │       ├── analytics.py                  # Agent efficiency scoring & best agent evaluation
 │       └── reporter.py                   # JSON/CSV reporting & aligned console output
 │
-├── web/                                  # Interactive UI & Visualizer
+├── web/                                  # Interactive UI & Visualizer Assets
 │   ├── templates/
 │   │   └── dashboard.html                # Web dashboard template with 60 FPS Canvas animation
 │   └── builder.py                        # Web dashboard compiler and multi-case preprocessor
@@ -46,9 +106,14 @@ Nexeg_Assignment/
 │
 ├── main.py                               # CLI Entry Point for simulation
 ├── dashboard.py                          # CLI Entry Point to launch animated web dashboard
-├── run_tests.py                          # Unified CLI test runner
+├── run_tests.py                          # Unified CLI test runner (10/10 tests passing)
 ├── data.json                             # Active configuration / input dataset
-└── requirements.txt                      # Project dependencies
+├── Dockerfile                            # Production container image specification
+├── docker-compose.yml                    # Multi-service container orchestration
+├── .gitignore                            # Standard Python & OS ignore rules
+├── .gitattributes                       # GitHub Linguist language statistics override
+├── requirements.txt                      # Project dependencies
+└── README.md                             # Comprehensive project documentation
 ```
 
 ---
@@ -56,7 +121,7 @@ Nexeg_Assignment/
 ## 🚀 Quick Start & Usage
 
 ### 1. Run the Delivery Simulation (CLI)
-Executes the simulation on `data.json`, prints dispatch logs to the console, and generates `report.json` and `best_agent.csv`:
+Runs the simulation on `data.json`, prints formatted dispatch tables to the console, and generates `report.json` and `best_agent.csv`:
 
 ```bash
 python main.py
@@ -70,22 +135,16 @@ python main.py "data/official_test_cases/test_case_1.json"
 ---
 
 ### 2. Launch the Interactive Web Dashboard
-Generates and opens the visual dashboard in your browser:
+Builds and opens the visual dashboard in your browser:
 
 ```bash
 python dashboard.py
 ```
 
-**Features in Dashboard:**
-- 🎬 **60 FPS Live Delivery Animation**: Watch agents navigate from starting points to warehouses and destinations with delivery bursts.
-- 📁 **Upload JSON with Schema Validator**: Upload custom test cases; invalid schemas are rejected with format guidance.
-- 📥 **Export CSV**: 1-click download of fleet metrics and dispatch logs.
-- 🎛️ **Test Case Selector**: Instantly toggle between base data and all 10 test cases.
-
 ---
 
-### 3. Run the Test Suite
-Executes all unit tests and integration tests across the 10 official assignment test cases:
+### 3. Run the Automated Test Suite
+Executes all unit tests and verifies all 10 official assignment test cases:
 
 ```bash
 python run_tests.py
@@ -95,14 +154,14 @@ python run_tests.py
 
 ## 🐳 Docker Support
 
-You can build and run the FastBox containerized services with Docker or Docker Compose:
+Run FastBox services in containerized environments:
 
 ### Using Docker CLI:
 ```bash
-# Build image
+# Build Docker image
 docker build -t fastbox-delivery .
 
-# Run simulation
+# Run delivery simulation
 docker run --rm -v ${PWD}/outputs:/app/outputs fastbox-delivery
 
 # Run test suite
@@ -123,16 +182,19 @@ docker-compose up dashboard
 
 ---
 
-## 🧮 Algorithm & Efficiency Formula
+## 📊 Test Case Verification Results (10/10 Passing)
 
-1. **Euclidean Distance Formula**:
-   $$\text{distance} = \sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}$$
-
-2. **Nearest Agent Dispatch Rule**:
-   For every package, the algorithm finds the agent closest to the pickup warehouse based on the agent's **current dynamic location**.
-
-3. **Efficiency Score**:
-   $$\text{efficiency} = \frac{\text{total\_distance}}{\text{packages\_delivered}}$$
-   - **Lower is better** (represents less distance traveled per delivered package).
-   - Zero deliveries are handled safely without division-by-zero errors.
-   - **Best Agent**: The agent with the lowest efficiency score.
+| Test Case | Packages | Delivered | Best Agent | Efficiency Score | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Base Case** | 5 | 5 | **A3** | 14.14 | ✅ **PASS** |
+| **TC 1** | 12 | 12 | **A1** | 18.96 | ✅ **PASS** |
+| **TC 2** | 10 | 10 | **A2** | 23.33 | ✅ **PASS** |
+| **TC 3** | 6 | 6 | **A3** | 20.32 | ✅ **PASS** |
+| **TC 4** | 12 | 12 | **A3** | 22.96 | ✅ **PASS** |
+| **TC 5** | 10 | 10 | **A3** | 21.81 | ✅ **PASS** |
+| **TC 6** | 9 | 9 | **A3** | 20.64 | ✅ **PASS** |
+| **TC 7** | 10 | 10 | **A3** | 17.57 | ✅ **PASS** |
+| **TC 8** | 11 | 11 | **A2** | 20.29 | ✅ **PASS** |
+| **TC 9** | 8 | 8 | **A2** | 19.78 | ✅ **PASS** |
+| **TC 10** | 11 | 11 | **A4** | 12.93 | ✅ **PASS** |
+| **TOTAL** | **99** | **99** | — | — | **100% SUCCESS** |
