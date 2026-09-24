@@ -1,0 +1,5 @@
+# FastBox Delivery System Dependencies
+# Note: Core system uses 100% Python Standard Library (math, json, csv, dataclasses, pathlib).
+# Optional test runners:
+pytest>=7.0.0
+

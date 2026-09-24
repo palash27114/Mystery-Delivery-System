@@ -1,0 +1,28 @@
+{
+  "warehouses": {
+    "W1": [15, 25],
+    "W2": [60, 80]
+  },
+  "agents": {
+    "A1": [10, 20],
+    "A2": [70, 65]
+  },
+  "packages": [
+    {
+      "id": "P1",
+      "warehouse": "W1",
+      "destination": [25, 45]
+    },
+    {
+      "id": "P2",
+      "warehouse": "W2",
+      "destination": [85, 95]
+    },
+    {
+      "id": "P3",
+      "warehouse": "W1",
+      "destination": [5, 10]
+    }
+  ]
+}
+

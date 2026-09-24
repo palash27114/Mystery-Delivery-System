@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FastBox - Live Delivery Animation & Dashboard</title>
+<style>
+  :root {
+    --bg: #0b0f19;
+    --surface: #131d31;
+    --surface2: #1e2c4a;
+    --surface3: #2a3d66;
+    --text: #f1f5f9;
+    --text2: #94a3b8;
+    --accent: #38bdf8;
+    --accent-glow: rgba(56, 189, 248, 0.35);
+    --green: #4ade80;
+    --green-glow: rgba(74, 222, 128, 0.35);
+    --yellow: #fbbf24;
+    --red: #f87171;
+    --red-glow: rgba(248, 113, 113, 0.35);
+    --radius: 12px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 40px;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: linear-gradient(180deg, #162238 0%, #0b0f19 100%);
+    border-bottom: 1px solid var(--surface2);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .logo-box {
+    background: linear-gradient(135deg, var(--accent), var(--green));
+    width: 42px; height: 42px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 900; color: #0b0f19;
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+  .logo {
+    font-size: 22px; font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #ffffff 40%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .logo-sub { color: var(--text2); font-size: 12px; font-weight: 500; }
+
+  .header-actions {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .selector-area {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .selector-label { color: var(--text2); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .tc-select {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1.5px solid var(--surface3);
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    min-width: 190px;
+    transition: all 0.2s ease;
+  }
+  .tc-select:hover, .tc-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow);
+  }
+  .tc-select option { background: var(--surface); color: var(--text); }
+
+  .header-btn {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--surface3);
+    padding: 7px 13px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+  }
+  .header-btn:hover {
+    background: var(--surface3);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .header-btn.upload-btn {
+    border-color: rgba(56, 189, 248, 0.4);
+    background: rgba(56, 189, 248, 0.1);
+    color: var(--accent);
+  }
+  .header-btn.upload-btn:hover {
+    background: var(--accent);
+    color: #080d18;
+    box-shadow: 0 0 12px var(--accent-glow);
+  }
+  .header-btn.csv-btn {
+    border-color: rgba(74, 222, 128, 0.4);
+    background: rgba(74, 222, 128, 0.1);
+    color: var(--green);
+  }
+  .header-btn.csv-btn:hover {
+    background: var(--green);
+    color: #080d18;
+    box-shadow: 0 0 12px var(--green-glow);
+  }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px 32px; }
+
+  /* ── Summary ── */
+  .summary-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--surface2);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+  }
+  .summary-card:hover { transform: translateY(-2px); }
+  .summary-card .big { font-size: 28px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; }
+  .summary-card .label { color: var(--text2); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+  .summary-card.best { border-color: var(--green); background: linear-gradient(180deg, rgba(74,222,128,0.08) 0%, var(--surface) 100%); }
+  .summary-card.best .big { color: var(--green); }
+  .summary-card.pass { border-color: var(--accent); }
+  .summary-card.pass .big { color: var(--accent); }
+
+  /* ── Agent Cards ── */
+  .section-title {
+    font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+    color: var(--text2); margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+  }
+  .agents-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .agent-card {
+    background: var(--surface);
+    border: 1px solid var(--surface2);
+    border-radius: var(--radius);
+    padding: 16px;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+  .agent-card.active-vehicle {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 16px var(--accent-glow);
+    transform: translateY(-2px);
+  }
+  .agent-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .agent-title-left { display: flex; align-items: center; gap: 8px; }
+  .agent-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px currentColor; }
+  .agent-name { font-weight: 700; font-size: 16px; }
+  .badge {
+    font-size: 10px; padding: 2px 7px; border-radius: 20px;
+    font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .badge.best { background: var(--green); color: #0b0f19; box-shadow: 0 0 10px var(--green-glow); }
+  .badge.live { background: var(--accent); color: #0b0f19; animation: pulse 1s infinite alternate; }
+  @keyframes pulse { from { opacity: 0.7; } to { opacity: 1; } }
+
+  .stat-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center; }
+  .stat { background: rgba(0,0,0,0.2); padding: 8px 4px; border-radius: 6px; }
+  .stat-value { font-size: 16px; font-weight: 700; color: #fff; }
+  .stat-label { font-size: 9px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+  /* ── Two Column ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1.55fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 950px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* ── Interactive Map Box ── */
+  .map-container {
+    background: var(--surface);
+    border: 1px solid var(--surface2);
+    border-radius: var(--radius);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+  }
+  .map-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px; flex-wrap: wrap; gap: 8px;
+  }
+  .live-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 700; color: var(--accent);
+  }
+  .live-dot {
+    width: 6px; height: 6px; background: var(--accent);
+    border-radius: 50%; box-shadow: 0 0 6px var(--accent);
+    animation: blink 1s infinite alternate;
+  }
+  @keyframes blink { from { opacity: 0.3; } to { opacity: 1; } }
+
+  canvas#mapCanvas {
+    width: 100%;
+    border-radius: 8px;
+    background: #080d18;
+    border: 1px solid var(--surface2);
+    display: block;
+    cursor: crosshair;
+  }
+
+  /* ── HUD Status Bar ── */
+  .hud-status-bar {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 13px;
+  }
+  .hud-status-text {
+    font-weight: 600; color: #fff;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .hud-pkg-badge {
+    background: var(--accent); color: #080d18;
+    font-size: 11px; font-weight: 800; padding: 2px 6px; border-radius: 4px;
+  }
+  .hud-metric { color: var(--text2); font-size: 12px; }
+
+  /* ── Progress bar ── */
+  .progress-bar-container {
+    height: 4px; background: var(--surface3); border-radius: 2px;
+    margin-top: 8px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; background: linear-gradient(90deg, var(--accent), var(--green));
+    width: 0%; transition: width 0.1s linear;
+  }
+
+  /* ── Playback Controls ── */
+  .controls-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--surface2);
+  }
+  .btn-group { display: flex; align-items: center; gap: 6px; }
+  .btn {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--surface3);
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+  }
+  .btn:hover { background: var(--surface3); border-color: var(--text2); }
+  .btn.primary {
+    background: var(--accent);
+    color: #080d18;
+    border-color: var(--accent);
+    font-weight: 700;
+    box-shadow: 0 0 12px var(--accent-glow);
+  }
+  .btn.primary:hover { background: #7dd3fc; border-color: #7dd3fc; }
+
+  .speed-group { display: flex; align-items: center; gap: 4px; }
+  .speed-btn {
+    background: transparent; color: var(--text2);
+    border: 1px solid var(--surface3); padding: 5px 9px;
+    border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;
+  }
+  .speed-btn.active {
+    background: var(--accent); color: #080d18; border-color: var(--accent);
+  }
+
+  .map-legend {
+    display: flex; gap: 14px; margin-top: 12px; flex-wrap: wrap;
+    font-size: 11px; color: var(--text2);
+  }
+  .map-legend span { display: flex; align-items: center; gap: 5px; }
+  .legend-icon { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+  /* ── Right Column: Chart ── */
+  .chart-container {
+    background: var(--surface);
+    border: 1px solid var(--surface2);
+    border-radius: var(--radius);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+  }
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .bar-label { width: 36px; font-weight: 700; font-size: 13px; text-align: right; }
+  .bar-track {
+    flex: 1; background: var(--surface2); border-radius: 6px; height: 28px;
+    overflow: hidden; position: relative;
+  }
+  .bar-fill {
+    height: 100%; border-radius: 6px;
+    display: flex; align-items: center; justify-content: flex-end;
+    padding-right: 8px; font-size: 12px; font-weight: 800; color: #080d18;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 28px;
+  }
+
+  /* ── Table ── */
+  .table-container {
+    background: var(--surface);
+    border: 1px solid var(--surface2);
+    border-radius: var(--radius);
+    padding: 18px;
+    overflow-x: auto;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left; padding: 10px 12px; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    color: var(--text2); border-bottom: 1.5px solid var(--surface2);
+  }
+  td {
+    padding: 10px 12px; border-bottom: 1px solid var(--surface2);
+    font-size: 13px; transition: background 0.2s;
+  }
+  tr.active-row td { background: rgba(56, 189, 248, 0.12) !important; color: #fff; font-weight: 600; }
+  tr.done-row td { opacity: 0.75; }
+  .agent-pill {
+    padding: 3px 9px; border-radius: 12px;
+    font-size: 11px; font-weight: 700; color: #080d18; display: inline-block;
+  }
+
+  /* ── Modal (Error & Rejection) ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(8, 13, 24, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-card {
+    background: var(--surface);
+    border: 1.5px solid var(--red);
+    box-shadow: 0 0 30px var(--red-glow);
+    border-radius: var(--radius);
+    max-width: 650px;
+    width: 100%;
+    padding: 24px;
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .modal-title {
+    font-size: 18px; font-weight: 800; color: var(--red);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .modal-close-btn {
+    background: var(--surface2); color: var(--text2);
+    border: none; border-radius: 6px; width: 28px; height: 28px;
+    font-size: 16px; font-weight: bold; cursor: pointer;
+  }
+  .modal-close-btn:hover { background: var(--surface3); color: #fff; }
+  .modal-reason {
+    background: rgba(248, 113, 113, 0.1);
+    border-left: 4px solid var(--red);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    color: #fca5a5;
+    font-size: 13.5px;
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+  .modal-help-heading {
+    font-size: 13px; font-weight: 700; color: var(--text);
+    margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .code-box {
+    background: #080d18;
+    border: 1px solid var(--surface2);
+    border-radius: 8px;
+    padding: 14px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 12.5px;
+    color: #a5f3fc;
+    overflow-x: auto;
+    white-space: pre;
+    line-height: 1.5;
+  }
+
+  /* Toast Notification */
+  .toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--green);
+    color: #080d18;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: 0 0 20px var(--green-glow);
+    display: none;
+    z-index: 1000;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  .footer {
+    text-align: center; padding: 24px; color: var(--text2); font-size: 12px;
+    border-top: 1px solid var(--surface2); margin-top: 32px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo-box">🚚</div>
+    <div>
+      <div class="logo">FastBox Delivery System</div>
+      <div class="logo-sub">Interactive Route Simulation & Performance Dashboard</div>
+    </div>
+  </div>
+
+  <div class="header-actions">
+    <!-- Test Case Dropdown -->
+    <div class="selector-area">
+      <span class="selector-label">Test Case:</span>
+      <select class="tc-select" id="tcSelect" onchange="switchTestCase()">
+        <!-- __OPTIONS_PLACEHOLDER__ -->
+      </select>
+    </div>
+
+    <!-- Upload JSON Button -->
+    <input type="file" id="jsonFileInput" accept=".json" style="display:none" onchange="handleFileUpload(event)">
+    <button class="header-btn upload-btn" onclick="document.getElementById('jsonFileInput').click()">
+      📁 Upload JSON
+    </button>
+
+    <!-- Export CSV Button -->
+    <button class="header-btn csv-btn" onclick="exportResultsCSV()">
+      📥 Export CSV
+    </button>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Top Metrics -->
+  <div id="summaryRow" class="summary-row"></div>
+
+  <!-- Agent Cards -->
+  <div class="section-title">Delivery Fleet Performance</div>
+  <div id="agentsGrid" class="agents-grid"></div>
+
+  <!-- Map + Live Simulation + Bar Chart -->
+  <div class="two-col">
+    <div class="map-container">
+      <div class="map-header">
+        <div class="section-title" style="margin:0">Live Delivery Route Map</div>
+        <div class="live-pill" id="livePill"><div class="live-dot"></div> <span id="livePillText">Simulation Ready</span></div>
+      </div>
+
+      <canvas id="mapCanvas" height="420"></canvas>
+
+      <!-- Progress bar -->
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progressBar"></div>
+      </div>
+
+      <!-- HUD Status Bar -->
+      <div class="hud-status-bar">
+        <div class="hud-status-text" id="hudStatus">
+          <span>Click <strong>Play</strong> to start vehicle delivery animation</span>
+        </div>
+        <div class="hud-metric" id="hudMetric">
+          0 / 0 packages delivered
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls-bar">
+        <div class="btn-group">
+          <button class="btn primary" id="btnPlay" onclick="togglePlay()">▶ Play Animation</button>
+          <button class="btn" onclick="stepPrev()">⏮ Prev</button>
+          <button class="btn" onclick="stepNext()">⏭ Next</button>
+          <button class="btn" onclick="resetAnimation()">↻ Reset</button>
+        </div>
+        <div class="speed-group">
+          <span style="font-size:11px;color:var(--text2);margin-right:4px">Speed:</span>
+          <button class="speed-btn" onclick="setSpeed(0.5, this)">0.5x</button>
+          <button class="speed-btn active" onclick="setSpeed(1, this)">1x</button>
+          <button class="speed-btn" onclick="setSpeed(2, this)">2x</button>
+          <button class="speed-btn" onclick="setSpeed(4, this)">4x</button>
+        </div>
+      </div>
+
+      <div class="map-legend">
+        <span><span class="legend-icon" style="background:var(--yellow);border-radius:2px"></span> Warehouse</span>
+        <span><span class="legend-icon" style="background:var(--red);border-radius:50%"></span> Destination</span>
+        <span><span class="legend-icon" style="background:var(--accent);border-radius:50%"></span> Agent Start</span>
+        <span><span class="legend-icon" style="background:var(--accent)"></span> Active Vehicle</span>
+      </div>
+    </div>
+
+    <!-- Chart Column -->
+    <div class="chart-container">
+      <div class="section-title">Efficiency Rating</div>
+      <p style="color:var(--text2);font-size:12px;margin-bottom:14px;">
+        Average distance per delivery (lower = more efficient).
+      </p>
+      <div id="barChart" style="flex:1"></div>
+    </div>
+  </div>
+
+  <!-- Delivery Log Table -->
+  <div class="table-container">
+    <div class="section-title">Full Delivery Dispatch Log</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Package</th><th>Agent</th><th>Pickup Warehouse</th>
+          <th>Delivery Destination</th><th>Distance</th><th>Delay</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="logBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Dialog for Rejection & Format Guidance -->
+<div class="modal-overlay" id="errorModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title">⚠️ JSON Validation Rejected</div>
+      <button class="modal-close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-reason" id="modalReasonText">
+      <!-- Error Reason dynamically injected here -->
+    </div>
+    <div class="modal-help-heading">Please upload the JSON in this required format:</div>
+    <div class="code-box">{
+  "warehouses": {
+    "W1": [34, 29],
+    "W2": [95, 4]
+  },
+  "agents": {
+    "A1": [89, 16],
+    "A2": [52, 21]
+  },
+  "packages": [
+    {
+      "id": "P1",
+      "warehouse": "W1",
+      "destination": [12, 7]
+    },
+    {
+      "id": "P2",
+      "warehouse": "W2",
+      "destination": [100, 1]
+    }
+  ]
+}</div>
+    <div style="margin-top: 18px; text-align: right;">
+      <button class="btn primary" onclick="closeModal()">Got it, I'll fix it</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast for success -->
+<div class="toast" id="toastMsg">✓ Success</div>
+
+<div class="footer">
+  FastBox Mystery Delivery System &bull; Algorithm Assignment Solution &bull; Real-time Canvas Animation
+</div>
+
+<script>
+/* __DATA_PLACEHOLDER__ */
+
+const COLORS = [
+  "#38bdf8", "#f87171", "#4ade80", "#fbbf24", "#c084fc",
+  "#f472b6", "#2dd4bf", "#fb923c", "#a3e635", "#818cf8"
+];
+
+let currentData = null;
+let agentColors = {};
+
+// Animation State
+let isPlaying = false;
+let animSpeed = 1.0;
+let currentPkgIdx = 0;
+let phase = 'to_warehouse';
+let t = 0.0;
+let lastFrameTime = null;
+let completedRoutes = [];
+let ripples = [];
+
+// ═══ CLIENT-SIDE DELIVERY SIMULATOR ═══
+function clientDistance(a, b) {
+  return Math.sqrt((b[0] - a[0])**2 + (b[1] - a[1])**2);
+}
+
+function simulateDataClientSide(data) {
+  const warehouses = data.warehouses;
+  const agents = data.agents;
+  const packages = data.packages;
+
+  const locs = {};
+  const stats = {};
+  Object.keys(agents).forEach(aid => {
+    locs[aid] = [...agents[aid]];
+    stats[aid] = { packages_delivered: 0, total_distance: 0.0 };
+  });
+
+  const delivery_log = [];
+
+  packages.forEach(pkg => {
+    const wh_id = pkg.warehouse;
+    const wh_loc = warehouses[wh_id];
+    const dest = pkg.destination;
+
+    // Find nearest agent
+    let best = null;
+    let bestDist = Infinity;
+    Object.keys(locs).forEach(aid => {
+      const d = clientDistance(locs[aid], wh_loc);
+      if (d < bestDist) {
+        bestDist = d;
+        best = aid;
+      }
+    });
+
+    const d_to_wh = clientDistance(locs[best], wh_loc);
+    const d_to_dest = clientDistance(wh_loc, dest);
+    const trip = d_to_wh + d_to_dest;
+
+    delivery_log.append ? null : delivery_log.push({
+      package: pkg.id,
+      agent: best,
+      warehouse: wh_id,
+      from: [...locs[best]],
+      warehouse_loc: [...wh_loc],
+      destination: [...dest],
+      distance_wh: Math.round(d_to_wh * 100) / 100,
+      distance_dest: Math.round(d_to_dest * 100) / 100,
+      distance: Math.round(trip * 100) / 100,
+      delay: Math.floor(Math.random() * 15) + 1
+    });
+
+    stats[best].packages_delivered += 1;
+    stats[best].total_distance += trip;
+    locs[best] = [...dest];
+  });
+
+  // Calculate efficiency
+  Object.keys(stats).forEach(aid => {
+    const s = stats[aid];
+    s.total_distance = Math.round(s.total_distance * 100) / 100;
+    if (s.packages_delivered > 0) {
+      s.efficiency = Math.round((s.total_distance / s.packages_delivered) * 100) / 100;
+    } else {
+      s.efficiency = 0;
+    }
+  });
+
+  // Best agent (lowest efficiency score)
+  const activeAids = Object.keys(stats).filter(aid => stats[aid].packages_delivered > 0);
+  let best_agent = null;
+  let lowestEff = Infinity;
+  activeAids.forEach(aid => {
+    if (stats[aid].efficiency < lowestEff) {
+      lowestEff = stats[aid].efficiency;
+      best_agent = aid;
+    }
+  });
+
+  return {
+    warehouses: warehouses,
+    agents: agents,
+    packages: packages,
+    stats: stats,
+    best_agent: best_agent,
+    delivery_log: delivery_log,
+    total_packages: packages.length,
+    total_delivered: delivery_log.length
+  };
+}
+
+// ═══ STRICT JSON VALIDATION ═══
+function validateTestcaseJSON(jsonObj) {
+  if (!jsonObj || typeof jsonObj !== 'object' || Array.isArray(jsonObj)) {
+    return "Root JSON must be an object containing 'warehouses', 'agents', and 'packages'.";
+  }
+
+  // 1. Validate Warehouses
+  if (!jsonObj.warehouses || typeof jsonObj.warehouses !== 'object' || Array.isArray(jsonObj.warehouses)) {
+    return "Missing or invalid 'warehouses' object. Expected: {\"W1\": [x, y], ...}";
+  }
+  const whKeys = Object.keys(jsonObj.warehouses);
+  if (whKeys.length === 0) {
+    return "'warehouses' must contain at least one warehouse.";
+  }
+  for (const w of whKeys) {
+    const loc = jsonObj.warehouses[w];
+    if (!Array.isArray(loc) || loc.length !== 2 || typeof loc[0] !== 'number' || typeof loc[1] !== 'number') {
+      return `Warehouse '${w}' must have [x, y] coordinates with two numbers. Found: ${JSON.stringify(loc)}`;
+    }
+  }
+
+  // 2. Validate Agents
+  if (!jsonObj.agents || typeof jsonObj.agents !== 'object' || Array.isArray(jsonObj.agents)) {
+    return "Missing or invalid 'agents' object. Expected: {\"A1\": [x, y], ...}";
+  }
+  const agentKeys = Object.keys(jsonObj.agents);
+  if (agentKeys.length === 0) {
+    return "'agents' must contain at least one delivery agent.";
+  }
+  for (const a of agentKeys) {
+    const loc = jsonObj.agents[a];
+    if (!Array.isArray(loc) || loc.length !== 2 || typeof loc[0] !== 'number' || typeof loc[1] !== 'number') {
+      return `Agent '${a}' must have [x, y] coordinates with two numbers. Found: ${JSON.stringify(loc)}`;
+    }
+  }
+
+  // 3. Validate Packages
+  if (!Array.isArray(jsonObj.packages)) {
+    return "Missing or invalid 'packages' list. Expected: [{\"id\": \"P1\", \"warehouse\": \"W1\", \"destination\": [x, y]}, ...]";
+  }
+  if (jsonObj.packages.length === 0) {
+    return "'packages' list must contain at least one package.";
+  }
+  for (let i = 0; i < jsonObj.packages.length; i++) {
+    const p = jsonObj.packages[i];
+    if (!p || typeof p !== 'object') {
+      return `Package at index ${i} must be an object.`;
+    }
+    if (!p.id || typeof p.id !== 'string') {
+      return `Package at index ${i} is missing a valid 'id' string.`;
+    }
+    if (!p.warehouse || typeof p.warehouse !== 'string') {
+      return `Package '${p.id}' is missing a valid 'warehouse' string key.`;
+    }
+    if (!jsonObj.warehouses[p.warehouse]) {
+      return `Package '${p.id}' references warehouse '${p.warehouse}' which does not exist in 'warehouses'.`;
+    }
+    if (!Array.isArray(p.destination) || p.destination.length !== 2 || typeof p.destination[0] !== 'number' || typeof p.destination[1] !== 'number') {
+      return `Package '${p.id}' destination must be [x, y] coordinates with two numbers. Found: ${JSON.stringify(p.destination)}`;
+    }
+  }
+
+  return null; // Valid!
+}
+
+function handleFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const content = e.target.result;
+    let parsed;
+    try {
+      parsed = JSON.parse(content);
+    } catch (err) {
+      showErrorModal("Invalid JSON syntax: " + err.message);
+      event.target.value = '';
+      return;
+    }
+
+    const errorReason = validateTestcaseJSON(parsed);
+    if (errorReason) {
+      showErrorModal(errorReason);
+      event.target.value = '';
+      return;
+    }
+
+    // Success! Calculate & inject into dashboard
+    const caseName = "Uploaded: " + file.name.replace('.json', '');
+    const simResult = simulateDataClientSide(parsed);
+    ALL_DATA[caseName] = simResult;
+
+    // Add option to select
+    const select = document.getElementById('tcSelect');
+    const opt = document.createElement('option');
+    opt.value = caseName;
+    opt.textContent = "📁 " + caseName;
+    select.appendChild(opt);
+    select.value = caseName;
+
+    switchTestCase();
+    showToast(`✓ Loaded & Evaluated "${file.name}"! Best: ${simResult.best_agent}`);
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function showErrorModal(reason) {
+  document.getElementById('modalReasonText').textContent = "❌ " + reason;
+  document.getElementById('errorModal').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('errorModal').style.display = 'none';
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toastMsg');
+  toast.textContent = msg;
+  toast.style.display = 'block';
+  setTimeout(() => { toast.style.display = 'none'; }, 3500);
+}
+
+// ═══ EXPORT CSV ═══
+function exportResultsCSV() {
+  if (!currentData) return;
+  const currentTcName = document.getElementById('tcSelect').value;
+  const d = currentData;
+
+  let csv = [];
+  csv.push(["FASTBOX DELIVERY SYSTEM - PERFORMANCE REPORT"]);
+  csv.push(["Test Case", currentTcName]);
+  csv.push(["Total Packages", d.total_packages]);
+  csv.push(["Packages Delivered", d.total_delivered]);
+  csv.push(["Fleet Size", Object.keys(d.agents).length]);
+  csv.push(["Warehouses", Object.keys(d.warehouses).length]);
+  csv.push(["Best Performing Agent", d.best_agent]);
+  csv.push([]);
+
+  // Section 1: Agent Performance
+  csv.push(["AGENT FLEET PERFORMANCE & EFFICIENCY"]);
+  csv.push(["Agent ID", "Packages Delivered", "Total Distance", "Efficiency (Distance/Package)", "Status"]);
+  Object.keys(d.stats).sort().forEach(aid => {
+    const s = d.stats[aid];
+    const isBest = aid === d.best_agent ? "BEST AGENT (Lowest Efficiency Score)" : "Active";
+    csv.push([aid, s.packages_delivered, s.total_distance, s.efficiency, isBest]);
+  });
+  csv.push([]);
+
+  // Section 2: Full Delivery Log
+  csv.push(["DELIVERY DISPATCH LOG"]);
+  csv.push(["Package ID", "Assigned Agent", "Pickup Warehouse", "Warehouse Coord", "Delivery Destination", "Trip Distance", "Delay (min)"]);
+  d.delivery_log.forEach(e => {
+    csv.push([
+      e.package,
+      e.agent,
+      e.warehouse,
+      `"${e.warehouse_loc.join(',')}"`,
+      `"${e.destination.join(',')}"`,
+      e.distance,
+      e.delay
+    ]);
+  });
+
+  const csvContent = csv.map(row => row.join(",")).join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const safeName = currentTcName.replace(/[^a-z0-9_-]/gi, '_').toLowerCase();
+  a.href = url;
+  a.download = `fastbox_report_${safeName}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showToast("📥 Exported CSV report successfully!");
+}
+
+// ═══ SWITCH TEST CASE ═══
+function switchTestCase() {
+  const name = document.getElementById('tcSelect').value;
+  currentData = ALL_DATA[name];
+  resetAnimation();
+  assignColors();
+  renderSummary();
+  renderAgentCards();
+  renderBarChart();
+  renderLogTable();
+  drawBase();
+}
+
+function assignColors() {
+  agentColors = {};
+  const aids = Object.keys(currentData.agents).sort();
+  aids.forEach((aid, i) => { agentColors[aid] = COLORS[i % COLORS.length]; });
+}
+
+function renderSummary() {
+  const d = currentData;
+  const status = d.total_delivered === d.total_packages ? 'PASS' : 'FAIL';
+  document.getElementById('summaryRow').innerHTML =
+    '<div class="summary-card"><div class="big">' + d.total_packages + '</div><div class="label">Total Packages</div></div>' +
+    '<div class="summary-card"><div class="big">' + Object.keys(d.agents).length + '</div><div class="label">Fleet Size</div></div>' +
+    '<div class="summary-card"><div class="big">' + Object.keys(d.warehouses).length + '</div><div class="label">Warehouses</div></div>' +
+    '<div class="summary-card best"><div class="big">' + d.best_agent + '</div><div class="label">Top Agent (Score: ' + (d.stats[d.best_agent] ? d.stats[d.best_agent].efficiency : 'N/A') + ')</div></div>' +
+    '<div class="summary-card pass"><div class="big">' + status + '</div><div class="label">' + d.total_delivered + '/' + d.total_packages + ' Packages Complete</div></div>';
+}
+
+function renderAgentCards(activeAgentId) {
+  const d = currentData;
+  let html = '';
+  Object.keys(d.stats).sort().forEach(function(aid) {
+    const s = d.stats[aid];
+    const isBest = aid === d.best_agent;
+    const isActive = aid === activeAgentId;
+    const color = agentColors[aid] || '#888';
+    let badge = isBest ? '<span class="badge best">BEST</span>' : '';
+    if (isActive) badge = '<span class="badge live">DELIVERING</span>';
+
+    const cardClass = 'agent-card' + (isActive ? ' active-vehicle' : '');
+    html += '<div class="' + cardClass + '" style="border-top:3.5px solid ' + color + '">' +
+      '<div class="agent-header">' +
+        '<div class="agent-title-left"><span class="agent-dot" style="background:' + color + ';color:' + color + '"></span>' +
+        '<span class="agent-name">' + aid + '</span></div>' + badge +
+      '</div>' +
+      '<div class="stat-row">' +
+        '<div class="stat"><div class="stat-value">' + s.packages_delivered + '</div><div class="stat-label">Delivered</div></div>' +
+        '<div class="stat"><div class="stat-value">' + s.total_distance + '</div><div class="stat-label">Distance</div></div>' +
+        '<div class="stat"><div class="stat-value">' + s.efficiency + '</div><div class="stat-label">Efficiency</div></div>' +
+      '</div></div>';
+  });
+  document.getElementById('agentsGrid').innerHTML = html;
+}
+
+function renderBarChart() {
+  const d = currentData;
+  const aids = Object.keys(d.stats).sort();
+  const maxEff = Math.max.apply(null, aids.map(function(a) { return d.stats[a].efficiency; })) || 1;
+  let html = '';
+  aids.forEach(function(aid) {
+    const s = d.stats[aid];
+    const color = agentColors[aid] || '#888';
+    const pct = s.packages_delivered > 0 ? Math.max((s.efficiency / maxEff * 100), 8) : 0;
+    html += '<div class="bar-row"><span class="bar-label">' + aid + '</span>' +
+      '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%;background:' + color + ';">' + s.efficiency + '</div></div></div>';
+  });
+  document.getElementById('barChart').innerHTML = html;
+}
+
+function renderLogTable() {
+  const log = currentData.delivery_log;
+  let html = '';
+  log.forEach(function(e, i) {
+    const color = agentColors[e.agent] || '#888';
+    const isDone = i < currentPkgIdx;
+    const isCur = i === currentPkgIdx;
+    let statusText = '<span style="color:var(--text2)">Pending</span>';
+    if (isDone) statusText = '<span style="color:var(--green)">✓ Delivered</span>';
+    if (isCur && isPlaying) statusText = '<span style="color:var(--accent)">⚡ In Transit</span>';
+
+    const rowClass = isCur ? 'active-row' : (isDone ? 'done-row' : '');
+
+    html += '<tr id="log-row-' + i + '" class="' + rowClass + '"><td><strong>' + e.package + '</strong></td>' +
+      '<td><span class="agent-pill" style="background:' + color + '">' + e.agent + '</span></td>' +
+      '<td>' + e.warehouse + ' [' + e.warehouse_loc.join(', ') + ']</td>' +
+      '<td>[' + e.destination.join(', ') + ']</td>' +
+      '<td>' + e.distance + '</td>' +
+      '<td>' + e.delay + ' min</td>' +
+      '<td>' + statusText + '</td></tr>';
+  });
+  document.getElementById('logBody').innerHTML = html;
+}
+
+// ═══ CANVAS GEOMETRY ═══
+const canvas = document.getElementById('mapCanvas');
+const ctx = canvas.getContext('2d');
+const PADDING = 45;
+
+function resizeCanvas() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const w = rect.width - 36;
+  canvas.style.width = w + 'px';
+  canvas.width = w * 2;
+  canvas.height = 420 * 2;
+  ctx.scale(2, 2);
+  if (currentData) drawFrame();
+}
+
+function getExtents() {
+  let allX = [], allY = [];
+  Object.values(currentData.warehouses).forEach(function(p) { allX.push(p[0]); allY.push(p[1]); });
+  Object.values(currentData.agents).forEach(function(p) { allX.push(p[0]); allY.push(p[1]); });
+  currentData.delivery_log.forEach(function(e) {
+    allX.push(e.destination[0]); allY.push(e.destination[1]);
+    allX.push(e.warehouse_loc[0]); allY.push(e.warehouse_loc[1]);
+  });
+  return {
+    minX: Math.min.apply(null, allX), maxX: Math.max.apply(null, allX),
+    minY: Math.min.apply(null, allY), maxY: Math.max.apply(null, allY)
+  };
+}
+
+function scaleX(x, ext) {
+  var w = canvas.width / 2 - PADDING * 2;
+  var range = (ext.maxX - ext.minX) || 1;
+  return PADDING + (x - ext.minX) / range * w;
+}
+function scaleY(y, ext) {
+  var h = 420 - PADDING * 2;
+  var range = (ext.maxY - ext.minY) || 1;
+  return PADDING + (1 - (y - ext.minY) / range) * h;
+}
+
+function drawGrid(ext) {
+  var w = canvas.width / 2, h = 420;
+  var rangeX = (ext.maxX - ext.minX) || 1;
+  var rangeY = (ext.maxY - ext.minY) || 1;
+  ctx.strokeStyle = 'rgba(30, 44, 74, 0.6)'; ctx.lineWidth = 0.5;
+  for (var i = 0; i <= 8; i++) {
+    var x = PADDING + (w - PADDING * 2) * i / 8;
+    ctx.beginPath(); ctx.moveTo(x, PADDING); ctx.lineTo(x, h - PADDING); ctx.stroke();
+    var y = PADDING + (h - PADDING * 2) * i / 8;
+    ctx.beginPath(); ctx.moveTo(PADDING, y); ctx.lineTo(w - PADDING, y); ctx.stroke();
+    ctx.fillStyle = '#64748b'; ctx.font = '10px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(Math.round(ext.minX + rangeX * i / 8), x, h - PADDING + 15);
+    ctx.textAlign = 'right';
+    ctx.fillText(Math.round(ext.minY + rangeY * (1 - i / 8)), PADDING - 8, y + 3);
+  }
+}
+
+function drawBase() {
+  drawFrame();
+}
+
+function addRipple(x, y, color) {
+  ripples.push({ x: x, y: y, radius: 4, alpha: 1.0, color: color });
+}
+
+// ═══ MAIN RENDER LOOP ═══
+function drawFrame() {
+  var w = canvas.width / 2;
+  ctx.clearRect(0, 0, w, 420);
+  if (!currentData) return;
+
+  var ext = getExtents();
+  drawGrid(ext);
+
+  // 1. Draw completed routes (soft trails)
+  completedRoutes.forEach(function(entry) {
+    var color = agentColors[entry.agent] || '#888';
+    // Leg 1: Agent start -> Warehouse
+    ctx.beginPath();
+    ctx.moveTo(scaleX(entry.from[0], ext), scaleY(entry.from[1], ext));
+    ctx.lineTo(scaleX(entry.warehouse_loc[0], ext), scaleY(entry.warehouse_loc[1], ext));
+    ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]); ctx.globalAlpha = 0.25;
+    ctx.stroke();
+
+    // Leg 2: Warehouse -> Destination
+    ctx.beginPath();
+    ctx.moveTo(scaleX(entry.warehouse_loc[0], ext), scaleY(entry.warehouse_loc[1], ext));
+    ctx.lineTo(scaleX(entry.destination[0], ext), scaleY(entry.destination[1], ext));
+    ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.setLineDash([]); ctx.globalAlpha = 0.45;
+    ctx.stroke();
+  });
+  ctx.globalAlpha = 1.0;
+  ctx.setLineDash([]);
+
+  // 2. Draw static elements: Warehouses, Destinations, Agent Starting locations
+  // Warehouses (Yellow square cards)
+  Object.entries(currentData.warehouses).forEach(function(entry) {
+    var id = entry[0], loc = entry[1];
+    var x = scaleX(loc[0], ext), y = scaleY(loc[1], ext);
+    ctx.fillStyle = '#fbbf24';
+    ctx.beginPath();
+    ctx.roundRect ? ctx.roundRect(x - 9, y - 9, 18, 18, 4) : ctx.fillRect(x - 9, y - 9, 18, 18);
+    ctx.fill();
+    ctx.fillStyle = '#080d18'; ctx.font = 'bold 10px Inter, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('W', x, y);
+    ctx.fillStyle = '#fef08a'; ctx.font = 'bold 11px Inter, sans-serif';
+    ctx.fillText(id, x, y - 14);
+  });
+
+  // Destinations (Red dots)
+  currentData.delivery_log.forEach(function(e, idx) {
+    var x = scaleX(e.destination[0], ext), y = scaleY(e.destination[1], ext);
+    var isDelivered = idx < currentPkgIdx;
+    ctx.beginPath();
+    ctx.arc(x, y, isDelivered ? 4.5 : 5.5, 0, Math.PI * 2);
+    ctx.fillStyle = isDelivered ? '#4ade80' : '#f87171';
+    ctx.fill();
+    ctx.strokeStyle = '#080d18'; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.fillStyle = '#cbd5e1'; ctx.font = '9px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(e.package, x, y - 9);
+  });
+
+  // Agent starting bases (Dashed outline circles)
+  Object.entries(currentData.agents).forEach(function(entry) {
+    var id = entry[0], loc = entry[1];
+    var x = scaleX(loc[0], ext), y = scaleY(loc[1], ext);
+    ctx.beginPath();
+    ctx.arc(x, y, 9, 0, Math.PI * 2);
+    ctx.strokeStyle = agentColors[id] || '#38bdf8';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([3, 3]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = agentColors[id] || '#38bdf8';
+    ctx.font = 'bold 11px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(id, x, y - 14);
+  });
+
+  // 3. Draw active animation vehicle and active path
+  const log = currentData.delivery_log;
+  if (currentPkgIdx < log.length) {
+    const cur = log[currentPkgIdx];
+    const color = agentColors[cur.agent] || '#38bdf8';
+
+    const pFrom = [scaleX(cur.from[0], ext), scaleY(cur.from[1], ext)];
+    const pWh   = [scaleX(cur.warehouse_loc[0], ext), scaleY(cur.warehouse_loc[1], ext)];
+    const pDest = [scaleX(cur.destination[0], ext), scaleY(cur.destination[1], ext)];
+
+    let curX, curY;
+
+    if (phase === 'to_warehouse') {
+      ctx.beginPath();
+      ctx.moveTo(pFrom[0], pFrom[1]);
+      ctx.lineTo(pWh[0], pWh[1]);
+      ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.setLineDash([5, 4]); ctx.globalAlpha = 0.8;
+      ctx.stroke();
+      ctx.globalAlpha = 1.0; ctx.setLineDash([]);
+
+      curX = pFrom[0] + (pWh[0] - pFrom[0]) * t;
+      curY = pFrom[1] + (pWh[1] - pFrom[1]) * t;
+    } else {
+      ctx.beginPath();
+      ctx.moveTo(pFrom[0], pFrom[1]);
+      ctx.lineTo(pWh[0], pWh[1]);
+      ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]); ctx.globalAlpha = 0.35;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(pWh[0], pWh[1]);
+      ctx.lineTo(pDest[0], pDest[1]);
+      ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.setLineDash([]); ctx.globalAlpha = 0.9;
+      ctx.stroke();
+      ctx.globalAlpha = 1.0;
+
+      curX = pWh[0] + (pDest[0] - pWh[0]) * t;
+      curY = pDest[1] + (pDest[1] - pWh[1]) * t;
+    }
+
+    // Vehicle Glow
+    const grad = ctx.createRadialGradient(curX, curY, 2, curX, curY, 18);
+    grad.addColorStop(0, color);
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(curX, curY, 18, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Vehicle Marker
+    ctx.beginPath();
+    ctx.arc(curX, curY, 8, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Agent label on moving vehicle
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 9px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(cur.agent, curX, curY - 11);
+  }
+
+  // 4. Draw expanding ripple effects
+  for (let i = ripples.length - 1; i >= 0; i--) {
+    const r = ripples[i];
+    ctx.beginPath();
+    ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
+    ctx.strokeStyle = r.color;
+    ctx.lineWidth = 2;
+    ctx.globalAlpha = r.alpha;
+    ctx.stroke();
+    ctx.globalAlpha = 1.0;
+
+    r.radius += 0.8;
+    r.alpha -= 0.03;
+    if (r.alpha <= 0) ripples.splice(i, 1);
+  }
+}
+
+// ═══ ANIMATION TICK ═══
+function animateLoop(now) {
+  if (!isPlaying) {
+    lastFrameTime = null;
+    return;
+  }
+  if (!lastFrameTime) lastFrameTime = now;
+  const dt = (now - lastFrameTime) / 1000;
+  lastFrameTime = now;
+
+  const log = currentData.delivery_log;
+  if (currentPkgIdx >= log.length) {
+    isPlaying = false;
+    document.getElementById('btnPlay').innerHTML = '▶ Play Again';
+    document.getElementById('livePillText').textContent = 'All Deliveries Complete';
+    document.getElementById('livePill').style.borderColor = 'var(--green)';
+    document.getElementById('livePill').style.color = 'var(--green)';
+    document.getElementById('hudStatus').innerHTML = '🎉 <strong>Simulation Complete!</strong> All packages delivered with 100% success.';
+    document.getElementById('progressBar').style.width = '100%';
+    renderAgentCards(null);
+    renderLogTable();
+    drawFrame();
+    return;
+  }
+
+  const cur = log[currentPkgIdx];
+  const legSpeed = 1.35 * animSpeed;
+  t += dt * legSpeed;
+
+  const ext = getExtents();
+
+  if (t >= 1.0) {
+    t = 0.0;
+    if (phase === 'to_warehouse') {
+      phase = 'to_destination';
+      const whX = scaleX(cur.warehouse_loc[0], ext);
+      const whY = scaleY(cur.warehouse_loc[1], ext);
+      addRipple(whX, whY, '#fbbf24');
+      updateHUD();
+    } else {
+      phase = 'to_warehouse';
+      completedRoutes.push(cur);
+      const destX = scaleX(cur.destination[0], ext);
+      const destY = scaleY(cur.destination[1], ext);
+      addRipple(destX, destY, '#4ade80');
+
+      currentPkgIdx++;
+      updateHUD();
+      renderLogTable();
+      renderAgentCards(currentPkgIdx < log.length ? log[currentPkgIdx].agent : null);
+
+      const el = document.getElementById('log-row-' + currentPkgIdx);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  const totalSteps = log.length * 2;
+  const curStep = (currentPkgIdx * 2) + (phase === 'to_destination' ? 1 : 0) + (t);
+  document.getElementById('progressBar').style.width = (curStep / totalSteps * 100) + '%';
+
+  drawFrame();
+  requestAnimationFrame(animateLoop);
+}
+
+function updateHUD() {
+  const log = currentData.delivery_log;
+  if (currentPkgIdx >= log.length) return;
+  const cur = log[currentPkgIdx];
+  const color = agentColors[cur.agent];
+
+  let statusMsg = '';
+  if (phase === 'to_warehouse') {
+    statusMsg = '🚚 <span style="color:' + color + ';font-weight:700">' + cur.agent + '</span> driving to warehouse <strong style="color:var(--yellow)">' + cur.warehouse + '</strong> to pick up <span class="hud-pkg-badge">' + cur.package + '</span>';
+  } else {
+    statusMsg = '📦 <span style="color:' + color + ';font-weight:700">' + cur.agent + '</span> delivering <span class="hud-pkg-badge">' + cur.package + '</span> to destination <strong>[' + cur.destination.join(', ') + ']</strong>';
+  }
+
+  document.getElementById('hudStatus').innerHTML = statusMsg;
+  document.getElementById('hudMetric').textContent = currentPkgIdx + ' / ' + log.length + ' packages delivered';
+  document.getElementById('livePillText').textContent = 'In Transit (Step ' + (currentPkgIdx + 1) + '/' + log.length + ')';
+}
+
+// ═══ CONTROLS ═══
+function togglePlay() {
+  if (currentPkgIdx >= currentData.delivery_log.length) {
+    resetAnimation();
+  }
+  isPlaying = !isPlaying;
+  document.getElementById('btnPlay').innerHTML = isPlaying ? '⏸ Pause' : '▶ Play Animation';
+  if (isPlaying) {
+    updateHUD();
+    renderAgentCards(currentData.delivery_log[currentPkgIdx].agent);
+    renderLogTable();
+    requestAnimationFrame(animateLoop);
+  }
+}
+
+function stepNext() {
+  isPlaying = false;
+  document.getElementById('btnPlay').innerHTML = '▶ Play Animation';
+  const log = currentData.delivery_log;
+  if (currentPkgIdx < log.length) {
+    completedRoutes.push(log[currentPkgIdx]);
+    currentPkgIdx++;
+    phase = 'to_warehouse';
+    t = 0.0;
+    updateHUD();
+    renderAgentCards(currentPkgIdx < log.length ? log[currentPkgIdx].agent : null);
+    renderLogTable();
+    drawFrame();
+  }
+}
+
+function stepPrev() {
+  isPlaying = false;
+  document.getElementById('btnPlay').innerHTML = '▶ Play Animation';
+  if (currentPkgIdx > 0) {
+    currentPkgIdx--;
+    completedRoutes.pop();
+    phase = 'to_warehouse';
+    t = 0.0;
+    updateHUD();
+    renderAgentCards(currentData.delivery_log[currentPkgIdx].agent);
+    renderLogTable();
+    drawFrame();
+  }
+}
+
+function resetAnimation() {
+  isPlaying = false;
+  currentPkgIdx = 0;
+  phase = 'to_warehouse';
+  t = 0.0;
+  completedRoutes = [];
+  ripples = [];
+  lastFrameTime = null;
+  document.getElementById('btnPlay').innerHTML = '▶ Play Animation';
+  document.getElementById('livePillText').textContent = 'Simulation Ready';
+  document.getElementById('livePill').style.borderColor = 'rgba(56, 189, 248, 0.3)';
+  document.getElementById('livePill').style.color = 'var(--accent)';
+  document.getElementById('hudStatus').innerHTML = '<span>Click <strong>Play</strong> to start vehicle delivery animation</span>';
+  document.getElementById('hudMetric').textContent = '0 / ' + (currentData ? currentData.delivery_log.length : 0) + ' packages delivered';
+  document.getElementById('progressBar').style.width = '0%';
+  if (currentData) {
+    renderAgentCards(null);
+    renderLogTable();
+    drawFrame();
+  }
+}
+
+function setSpeed(speed, btn) {
+  animSpeed = speed;
+  document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ═══ INITIALIZATION ═══
+window.addEventListener('resize', resizeCanvas);
+switchTestCase();
+resizeCanvas();
+</script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  # 1. Main Delivery Simulation Service
+  simulator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fastbox-simulator
+    volumes:
+      - ./outputs:/app/outputs
+      - ./data.json:/app/data.json
+    command: ["python", "main.py"]
+
+  # 2. Automated Test Suite Service
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fastbox-tests
+    command: ["python", "run_tests.py"]
+
+  # 3. Web Dashboard Compiler & HTTP Server
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fastbox-dashboard
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./outputs:/app/outputs
+    command: >
+      sh -c "python -c 'from web.builder import generate_dashboard_file; generate_dashboard_file()' &&
+             python -m http.server 8080 --directory outputs"
+
