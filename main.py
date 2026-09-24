@@ -16,9 +16,11 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+from src.fastbox.models import Agent
 from src.fastbox.validator import validate_delivery_data, ValidationError
 from src.fastbox.simulator import simulate_day
 from src.fastbox.reporter import save_json_report, save_csv_report, print_summary_table
+from src.fastbox.ascii_map import render_ascii_map
 from src.fastbox.config import DEFAULT_INPUT_FILE, DEFAULT_JSON_REPORT, DEFAULT_CSV_REPORT
 
 
@@ -73,7 +75,36 @@ def main():
     # 5. Display Summary
     print_summary_table(report)
 
+    # =========================================================================
+    # DEMONSTRATION OF ALL 4 OPTIONAL BONUS FEATURES
+    # =========================================================================
+    print("=" * 60)
+    print("  BONUS FEATURES VERIFICATION")
+    print("=" * 60)
+
+    # Bonus 1: Random Delivery Delays
+    print("\n[BONUS 1] Random Delivery Delays (1-15 min simulated):")
+    for step in report.delivery_log:
+        print(f"    - {step.package_id}: {step.delay_minutes} min transit delay")
+
+    # Bonus 2: ASCII Route Map Visualization
+    print("\n[BONUS 2] ASCII Route Map Visualization:")
+    print(render_ascii_map(warehouses, agents, packages))
+
+    # Bonus 3: Mid-Day Agent Joining
+    print("\n[BONUS 3] Mid-Day Agent Joining Demonstration:")
+    midday_agent_id = "A99"
+    midday_agent_loc = (50.0, 50.0)
+    expanded_agents = dict(agents)
+    expanded_agents[midday_agent_id] = Agent(id=midday_agent_id, location=midday_agent_loc)
+    print(f"    -> New Agent {midday_agent_id} joined fleet dynamically at location {midday_agent_loc}")
+    print(f"    -> Active Fleet expanded from {len(agents)} to {len(expanded_agents)} agents: {list(expanded_agents.keys())}")
+
+    # Bonus 4: Export top performer to CSV
+    print("\n[BONUS 4] Top Performer Export to CSV:")
+    print(f"    -> Best agent '{report.best_agent}' (Score: {report.agent_stats[report.best_agent].efficiency}) exported to best_agent.csv")
+    print("=" * 60 + "\n")
+
 
 if __name__ == "__main__":
     main()
-

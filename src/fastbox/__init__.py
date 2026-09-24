@@ -10,6 +10,7 @@ from .validator import validate_delivery_data, ValidationError
 from .simulator import simulate_day
 from .analytics import calculate_efficiency, get_best_agent
 from .reporter import save_json_report, save_csv_report
+from .ascii_map import render_ascii_map
 
 __version__ = "1.0.0"
 __all__ = [
@@ -28,5 +29,5 @@ __all__ = [
     "get_best_agent",
     "save_json_report",
     "save_csv_report",
+    "render_ascii_map",
 ]
-
