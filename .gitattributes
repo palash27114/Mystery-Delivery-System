@@ -1,0 +1,12 @@
+# GitHub Linguist Language Override
+# Treats generated HTML files and data as vendored/generated so Python shows as the primary language (95%+)
+
+*.html linguist-generated=true
+*.html linguist-vendored=true
+public/** linguist-generated=true
+public/** linguist-vendored=true
+outputs/** linguist-generated=true
+outputs/** linguist-vendored=true
+web/templates/** linguist-vendored=true
+data/** linguist-vendored=true
+
