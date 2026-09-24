@@ -117,10 +117,6 @@ def generate_dashboard_file(output_path: Path = DEFAULT_DASHBOARD_HTML) -> Path:
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(html)
 
-    # Also sync copy to root dashboard.html for easy browser opening
-    root_dashboard = PROJECT_ROOT / "dashboard.html"
-    with open(root_dashboard, "w", encoding="utf-8") as f:
-        f.write(html)
     # Sync copies for local opening and instant Vercel deployment
     for target in [
         PROJECT_ROOT / "dashboard.html",
