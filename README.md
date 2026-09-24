@@ -123,33 +123,6 @@ docker-compose up dashboard
 
 ---
 
-## ⚡ Vercel Deployment Guide
-
-This project is pre-configured with `vercel.json` and a standalone `public/index.html` static web application.
-
-### Option A: Deploy via GitHub (Recommended)
-1. Push your repository to GitHub:
-   ```bash
-   git add .
-   git commit -m "Deploy FastBox to Vercel"
-   git push origin main
-   ```
-2. Go to [vercel.com](https://vercel.com/) and click **"Add New Project"**.
-3. Import your GitHub repository (`palash27114/Mystery-Delivery-System` or your repo).
-4. Keep the default settings (Framework Preset: **Other** / Root Directory: `./`).
-5. Click **Deploy**! 🚀
-
-### Option B: Deploy via Vercel CLI
-```bash
-# Install Vercel CLI (if not installed)
-npm i -g vercel
-
-# Deploy directly from the project directory
-vercel --prod
-```
-
----
-
 ## 🧮 Algorithm & Efficiency Formula
 
 1. **Euclidean Distance Formula**:

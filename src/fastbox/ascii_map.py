@@ -63,3 +63,4 @@ def render_ascii_map(
     lines.append("Legend: [W] Warehouse  |  [A] Agent Start  |  [D] Destination")
 
     return "\n".join(lines)
+
